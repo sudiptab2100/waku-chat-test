@@ -47,11 +47,18 @@
     </div>
     <div id="remote-peer-id"></div>
     <br />
-    <button disabled id="subscribe" type="button">Subscribe with Filter</button>
+    
+    <label for="sender">Receiver Username</label>
+    <input id="sender" placeholder="Type your Username here" type="text" />
+    <br>
+    <button disabled id="subscribe" type="button">Subscribe with Username</button>
     <button disabled id="unsubscribe" type="button">
-      Unsubscribe with Filter
+      Unsubscribe with Username
     </button>
     <br />
+    <label for="receiver">Receiver Username</label>
+    <input id="receiver" placeholder="Type receiver's Username here" type="text" />
+    <br>
     <label for="textInput">Message text</label>
     <input id="textInput" placeholder="Type your message here" type="text" />
     <button disabled id="sendButton" type="button">
@@ -96,10 +103,12 @@
       const sendButton = document.getElementById("sendButton");
       const getPeersButton = document.getElementById("getPeersButton");
       const peersSelector = document.getElementById("peer-select");
+      const sender = document.getElementById("sender");
+      const receiver = document.getElementById("receiver");
 
       const ContentTopic = "/meta/chat/";
-      const decoder = createDecoder(ContentTopic);
-      const encoder = createEncoder({ contentTopic: ContentTopic });
+      const decoder = createDecoder(ContentTopic + sender.value);
+      const encoder = createEncoder({ contentTopic: ContentTopic + receiver.value });
       // Each key is a unique identifier for the message. Each value is an obj { text, timestamp }
       let messages = {};
       let unsubscribe;
@@ -209,6 +218,7 @@
         );
         unsubscribeButton.disabled = false;
         subscribeButton.disabled = true;
+        sender.disabled = true;
       };
 
       queryStoreButton.onclick = async () => {
@@ -223,6 +233,7 @@
         unsubscribe = undefined;
         unsubscribeButton.disabled = true;
         subscribeButton.disabled = false;
+        sender.disabled = false;
       };
 
       sendButton.onclick = async () => {
