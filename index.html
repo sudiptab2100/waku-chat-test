@@ -48,7 +48,7 @@
     <div id="remote-peer-id"></div>
     <br />
     
-    <label for="sender">Receiver Username</label>
+    <label for="sender">Your Username</label>
     <input id="sender" placeholder="Type your Username here" type="text" />
     <br>
     <button disabled id="subscribe" type="button">Subscribe with Username</button>
@@ -106,9 +106,9 @@
       const sender = document.getElementById("sender");
       const receiver = document.getElementById("receiver");
 
-      const ContentTopic = "/meta/chat/";
-      const decoder = createDecoder(ContentTopic + sender.value);
-      const encoder = createEncoder({ contentTopic: ContentTopic + receiver.value });
+      const ContentTopic = "/waku/se/chat/";
+      let decoder = createDecoder(ContentTopic + sender.value);
+      let encoder = createEncoder({ contentTopic: ContentTopic + receiver.value });
       // Each key is a unique identifier for the message. Each value is an obj { text, timestamp }
       let messages = {};
       let unsubscribe;
@@ -212,6 +212,7 @@
       };
 
       subscribeButton.onclick = async () => {
+        decoder = createDecoder(ContentTopic + sender.value)
         unsubscribe = await node.filter.subscribe(
           [decoder],
           messageReceivedCallback
@@ -222,6 +223,8 @@
       };
 
       queryStoreButton.onclick = async () => {
+        decoder = createDecoder(ContentTopic + sender.value)
+        console.log(decoder)
         await node.store.queryWithOrderedCallback(
           [decoder],
           messageReceivedCallback
@@ -238,7 +241,7 @@
 
       sendButton.onclick = async () => {
         const text = textInput.value;
-
+        encoder = createEncoder({contentTopic: ContentTopic + receiver.value})
         await node.lightPush.send(encoder, {
           payload: utf8ToBytes(text),
         });
@@ -270,6 +273,7 @@
           filter: defaultNodeCount,
           lightPush: defaultNodeCount,
         });
+        console.log(peers);
 
         // Create an option element for each peer's multiaddr and append to select element
         const optionElements = peers.map((peer) => {
@@ -278,6 +282,7 @@
           optionElement.text = `${peer.multiaddrs[1]}/p2p/${peer.peerId}`;
           return optionElement;
         });
+        console.log(optionElements);
         peersSelector.append(...optionElements);
 
         // Set first peer as selected
