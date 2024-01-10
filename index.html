@@ -107,8 +107,6 @@
       const receiver = document.getElementById("receiver");
 
       const ContentTopic = "/waku/se/chat/";
-      let decoder = createDecoder(ContentTopic + sender.value);
-      let encoder = createEncoder({ contentTopic: ContentTopic + receiver.value });
       // Each key is a unique identifier for the message. Each value is an obj { text, timestamp }
       let messages = {};
       let unsubscribe;
@@ -212,9 +210,8 @@
       };
 
       subscribeButton.onclick = async () => {
-        decoder = createDecoder(ContentTopic + sender.value)
         unsubscribe = await node.filter.subscribe(
-          [decoder],
+          [await getDecoder()],
           messageReceivedCallback
         );
         unsubscribeButton.disabled = false;
@@ -223,10 +220,8 @@
       };
 
       queryStoreButton.onclick = async () => {
-        decoder = createDecoder(ContentTopic + sender.value)
-        console.log(decoder)
         await node.store.queryWithOrderedCallback(
-          [decoder],
+          [await getDecoder()],
           messageReceivedCallback
         );
       };
@@ -241,8 +236,8 @@
 
       sendButton.onclick = async () => {
         const text = textInput.value;
-        encoder = createEncoder({contentTopic: ContentTopic + receiver.value})
-        await node.lightPush.send(encoder, {
+        
+        await node.lightPush.send(await getEncoder(), {
           payload: utf8ToBytes(text),
         });
         console.log("Message sent!");
@@ -256,6 +251,14 @@
       peersSelector.addEventListener("change", function (event) {
         remoteMultiAddrDiv.value = event.target.value;
       });
+
+      async function getDecoder() {
+        return createDecoder(ContentTopic + sender.value);
+      }
+
+      async function getEncoder() {
+        return createEncoder({contentTopic: ContentTopic + receiver.value});
+      }
 
       async function getPeers() {
         // Display status
